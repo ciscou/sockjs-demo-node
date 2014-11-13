@@ -6,6 +6,7 @@
   "dependencies": {},
   "devDependencies": {
     "coffee-script": "^1.8.0",
+    "redis": "^0.12.x",
     "sockjs": "^0.3.x"
   },
   "scripts": {
