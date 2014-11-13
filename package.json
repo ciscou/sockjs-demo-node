@@ -1,0 +1,16 @@
+{
+  "name": "sockjs-demo-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.coffee",
+  "dependencies": {},
+  "devDependencies": {
+    "coffee-script": "^1.8.0",
+    "sockjs": "^0.3.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
