@@ -2,19 +2,22 @@ http = require('http')
 sockjs = require('sockjs')
 redis = require('redis')
 
-clients = []
+clients = {}
 
 broadcaster = sockjs.createServer()
 server = http.createServer()
 broadcaster.on 'connection', (conn) ->
-  console.log 'got connection!'
-  clients.push conn
+  console.log "got connection #{conn.id}!"
+  clients[conn.id] = conn
+  conn.on 'close', ->
+    console.log "closed connection #{conn.id}!"
+    delete clients[conn.id]
 
 broadcaster.installHandlers(server, prefix: '/broadcast')
 server.listen(process.env.PORT || 5000)
 
 broadcast = (message) ->
-  for client in clients
+  for _, client of clients
     client.write JSON.stringify(message)
 
 redisClient = if process.env.REDISTOGO_URL
