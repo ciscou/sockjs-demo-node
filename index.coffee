@@ -12,9 +12,13 @@ broadcaster.on 'connection', (conn) ->
 broadcaster.installHandlers(server, prefix: '/broadcast')
 server.listen(process.env.PORT || 5000)
 
-broadcast = (message) ->
+broadcast = (key, value) ->
+  message = {}
+  message[key] = value
+
   for id, client of clients
     client.write JSON.stringify(message)
+
   null
 
 connectToRedis = ->
@@ -30,13 +34,16 @@ connectToRedis = ->
 redisClient = connectToRedis()
 
 blpopLoop = ->
-  redisClient.blpop 'sockjs-demo:messages', 0, (err, res) ->
+  redisClient.blpop 'sockjs-demo:messages', 10, (err, res) ->
     if err?
       console.log err
-    else
+    else if res?
       [key, value] = res
-      message = {}
-      message[key] = value
-      broadcast message
+      console.log "Got from redis: #{key} => #{value}"
+      broadcast key, value
+    else
+      console.log "Timeout, no new messages in last 10 seconds"
+
     blpopLoop()
+
 blpopLoop()
