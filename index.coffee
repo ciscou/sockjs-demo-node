@@ -7,6 +7,7 @@ clients = []
 broadcaster = sockjs.createServer()
 server = http.createServer()
 broadcaster.on 'connection', (conn) ->
+  console.log 'got connection!'
   clients.push conn
 
 broadcaster.installHandlers(server, prefix: '/broadcast')
@@ -19,7 +20,9 @@ broadcast = (message) ->
 redisClient = redis.createClient()
 blpopLoop = ->
   redisClient.blpop 'sockjs-demo:messages', 0, (err, res) ->
-    unless err?
+    if err?
+      console.log err
+    else
       [key, value] = res
       message = {}
       message[key] = value
