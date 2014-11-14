@@ -1,11 +1,7 @@
-http = require('http')
-sockjs = require('sockjs')
-redis = require('redis')
-
 clients = {}
 
-broadcaster = sockjs.createServer()
-server = http.createServer()
+broadcaster = require('sockjs').createServer()
+server = require('http').createServer()
 broadcaster.on 'connection', (conn) ->
   console.log "got connection #{conn.id}!"
   clients[conn.id] = conn
@@ -17,16 +13,22 @@ broadcaster.installHandlers(server, prefix: '/broadcast')
 server.listen(process.env.PORT || 5000)
 
 broadcast = (message) ->
-  for _, client of clients
+  for id, client of clients
     client.write JSON.stringify(message)
+  null
 
-redisClient = if process.env.REDISTOGO_URL
-                rtg    = require("url").parse(process.env.REDISTOGO_URL)
-                client = redis.createClient(rtg.port, rtg.hostname)
-                client.auth(rtg.auth.split(":")[1])
-                client
-              else
-                redis.createClient()
+connectToRedis = ->
+  if process.env.REDISTOGO_URL
+    rtg = require("url").parse(process.env.REDISTOGO_URL)
+    client = require('redis').createClient(rtg.port, rtg.hostname)
+    client.auth(rtg.auth.split(":")[1])
+  else
+    client = require('redis').createClient()
+
+  client
+
+redisClient = connectToRedis()
+
 blpopLoop = ->
   redisClient.blpop 'sockjs-demo:messages', 0, (err, res) ->
     if err?
