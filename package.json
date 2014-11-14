@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.coffee",
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "coffee-script": "^1.8.0",
     "redis": "^0.12.x",
     "sockjs": "^0.3.x"
   },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
