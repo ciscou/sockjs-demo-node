@@ -16,11 +16,10 @@ server.listen(process.env.PORT || 5000)
 broadcast = (channel, message) ->
   payload = {}
   payload[channel] = message
+  json = JSON.stringify(payload)
 
   for id, client of clients
-    client.write JSON.stringify(payload)
-
-  null
+    client.write json
 
 connectToRedis = ->
   if process.env.REDISTOGO_URL
