@@ -1,7 +1,6 @@
 clients = {}
 
 broadcaster = require('sockjs').createServer()
-server = require('http').createServer()
 broadcaster.on 'connection', (conn) ->
   console.log "got connection #{conn.id}!"
   clients[conn.id] = conn
@@ -9,15 +8,17 @@ broadcaster.on 'connection', (conn) ->
     console.log "closed connection #{conn.id}!"
     delete clients[conn.id]
 
+server = require('http').createServer()
 broadcaster.installHandlers(server, prefix: '/broadcast')
+
 server.listen(process.env.PORT || 5000)
 
-broadcast = (key, value) ->
-  message = {}
-  message[key] = value
+broadcast = (channel, message) ->
+  payload = {}
+  payload[channel] = message
 
   for id, client of clients
-    client.write JSON.stringify(message)
+    client.write JSON.stringify(payload)
 
   null
 
@@ -33,17 +34,8 @@ connectToRedis = ->
 
 redisClient = connectToRedis()
 
-blpopLoop = ->
-  redisClient.blpop 'sockjs-demo:messages', 10, (err, res) ->
-    if err?
-      console.log err
-    else if res?
-      [key, value] = res
-      console.log "Got from redis: #{key} => #{value}"
-      broadcast key, value
-    else
-      console.log "Timeout, no new messages in last 10 seconds"
+redisClient.on 'pmessage', (pattern, channel, message) ->
+  console.log "Got from redis: #{channel} => #{message}"
+  broadcast channel, message
 
-    blpopLoop()
-
-blpopLoop()
+redisClient.psubscribe 'sockjs-demo:*'
