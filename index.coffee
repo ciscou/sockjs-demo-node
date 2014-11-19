@@ -1,5 +1,3 @@
-clients = {}
-
 connectToRedis = ->
   if process.env.REDISTOGO_URL
     rtg = require("url").parse(process.env.REDISTOGO_URL)
@@ -9,43 +7,17 @@ connectToRedis = ->
     client = require('redis').createClient()
   client
 
-send = (client, channel, message) ->
-  payload = {}
-  payload[channel] = message
-  json = JSON.stringify(payload)
-  client.write json
+Updater = require('./updater')
+updater = new Updater(connectToRedis())
 
-broadcast = (channel, message) ->
-  for id, client of clients
-    send client, channel, message
+Broadcaster = require('./broadcaster')
+broadcaster = new Broadcaster
+broadcaster.onConnect = (client) ->
+  updater.sendLatestMessagesTo(broadcaster, client)
+broadcaster.connect()
 
-redis = connectToRedis()
-
-broadcaster = require('sockjs').createServer()
-broadcaster.on 'connection', (client) ->
-  console.log "got connection #{client.id}!"
-  broadcast 'info', "got connection #{client.id}"
-  clients[client.id] = client
-  client.on 'close', ->
-    console.log "closed connection #{client.id}!"
-    broadcast 'info', "closed connection #{client.id}!"
-    delete clients[client.id]
-  console.log "fetching latest messages..."
-  redis.lrange 'messages', 0, -1, (error, messages) ->
-    if error?
-      console.log error
-      return
-    send client, 'info', "There are #{Object.keys(clients).length} clients connected"
-    console.log "got #{messages.length} latest messages"
-    for message in messages.reverse()
-      send client, 'latest', message
-
-server = require('http').createServer()
-broadcaster.installHandlers(server, prefix: '/broadcast')
-server.listen(process.env.PORT || 5000)
-
-subscriber = connectToRedis()
-subscriber.on 'pmessage', (pattern, channel, message) ->
+Subscriber = require('./subscriber')
+subscriber = new Subscriber(connectToRedis())
+subscriber.subscribe (channel, message) ->
   console.log "Got from redis: #{channel} => #{message}"
-  broadcast channel, message
-subscriber.psubscribe 'sockjs-demo:*'
+  broadcaster.broadcast channel, message
