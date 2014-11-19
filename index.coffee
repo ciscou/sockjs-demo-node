@@ -13,8 +13,7 @@ send = (client, channel, message) ->
   payload = {}
   payload[channel] = message
   json = JSON.stringify(payload)
-  for id, client of clients
-    client.write json
+  client.write json
 
 broadcast = (channel, message) ->
   for id, client of clients
@@ -25,15 +24,18 @@ redis = connectToRedis()
 broadcaster = require('sockjs').createServer()
 broadcaster.on 'connection', (client) ->
   console.log "got connection #{client.id}!"
+  broadcast 'info', "got connection #{client.id}"
   clients[client.id] = client
   client.on 'close', ->
     console.log "closed connection #{client.id}!"
+    broadcast 'info', "closed connection #{client.id}!"
     delete clients[client.id]
   console.log "fetching latest messages..."
   redis.lrange 'messages', 0, -1, (error, messages) ->
     if error?
       console.log error
       return
+    send client, 'info', "There are #{Object.keys(clients).length} clients connected"
     console.log "got #{messages.length} latest messages"
     for message in messages.reverse()
       send client, 'latest', message
