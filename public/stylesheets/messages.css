@@ -1,0 +1,18 @@
+body {
+  padding-bottom: 70px;
+}
+
+#new-message-container {
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: 0;
+
+  background-color: #f8f8f8;
+  border: 1px solid #e7e7e7;
+}
+
+form#new-message {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}

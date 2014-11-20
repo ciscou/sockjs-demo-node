@@ -9,6 +9,7 @@ connectToRedis = ->
 
 express = require('express')
 app = express()
+app.use express.static('public')
 server = app.listen(process.env.PORT || 5000)
 
 Publisher = require('./publisher')
