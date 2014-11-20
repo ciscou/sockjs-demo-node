@@ -7,6 +7,10 @@ connectToRedis = ->
     redis = require('redis').createClient()
   redis
 
+express = require('express')
+app = express()
+server = app.listen(process.env.PORT || 5000)
+
 Publisher = require('./publisher')
 publisher = new Publisher(connectToRedis())
 
@@ -18,7 +22,7 @@ broadcaster.onNewSession = (session) ->
       session.send 'latest', message
   session.onMessage = (message) ->
     publisher.publish message
-broadcaster.connect()
+broadcaster.connect(server)
 
 Subscriber = require('./subscriber')
 subscriber = new Subscriber(connectToRedis())

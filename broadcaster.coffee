@@ -6,7 +6,7 @@ class Broadcaster
 
   onNewSession: (session) ->
 
-  connect: (callback) ->
+  connect: (server) ->
     sockjs = require('sockjs').createServer()
 
     sockjs.on 'connection', (client) =>
@@ -20,9 +20,7 @@ class Broadcaster
 
       @onNewSession(session)
 
-    server = require('http').createServer()
     sockjs.installHandlers(server, prefix: '/broadcast')
-    server.listen(process.env.PORT || 5000)
 
   addClient: (client) ->
     session = new Session(client)
