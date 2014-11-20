@@ -1,19 +1,23 @@
 connectToRedis = ->
   if process.env.REDISTOGO_URL
     rtg = require("url").parse(process.env.REDISTOGO_URL)
-    client = require('redis').createClient(rtg.port, rtg.hostname)
-    client.auth(rtg.auth.split(":")[1])
+    redis = require('redis').createClient(rtg.port, rtg.hostname)
+    redis.auth(rtg.auth.split(":")[1])
   else
-    client = require('redis').createClient()
-  client
+    redis = require('redis').createClient()
+  redis
 
-Updater = require('./updater')
-updater = new Updater(connectToRedis())
+Publisher = require('./publisher')
+publisher = new Publisher(connectToRedis())
 
 Broadcaster = require('./broadcaster')
 broadcaster = new Broadcaster
-broadcaster.onConnect = (client) ->
-  updater.sendLatestMessagesTo(broadcaster, client)
+broadcaster.onNewSession = (session) ->
+  publisher.getLatestMessages (messages) ->
+    for message in messages.reverse()
+      session.send 'latest', message
+  session.onMessage = (message) ->
+    publisher.publish message
 broadcaster.connect()
 
 Subscriber = require('./subscriber')

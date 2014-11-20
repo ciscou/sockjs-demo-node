@@ -1,45 +1,42 @@
+Session = require('./session')
+
 class Broadcaster
   constructor: ->
-    @clients = {}
+    @sessions = {}
 
-  onConnect: (client) ->
+  onNewSession: (session) ->
 
   connect: (callback) ->
-    self = this
-
     sockjs = require('sockjs').createServer()
 
-    sockjs.on 'connection', (client) ->
+    sockjs.on 'connection', (client) =>
       console.log "got connection #{client.id}!"
-      self.addClient(client)
+      @broadcast 'info', "got connection #{client.id}"
+      session = @addClient(client)
 
-      client.on 'close', ->
+      client.on 'close', =>
         console.log "closed connection #{client.id}!"
-        self.removeClient(client)
+        @removeClient(client)
 
-      self.onConnect(client)
+      @onNewSession(session)
 
     server = require('http').createServer()
     sockjs.installHandlers(server, prefix: '/broadcast')
     server.listen(process.env.PORT || 5000)
 
   addClient: (client) ->
-    @broadcast 'info', "got connection #{client.id}"
-    @clients[client.id] = client
-    @send client, 'info', "There are #{Object.keys(@clients).length} clients connected"
+    session = new Session(client)
+    @sessions[client.id] = session
+    session.send 'info', "There are #{Object.keys(@sessions).length} clients connected"
+
+    session
 
   removeClient: (client) ->
     @broadcast 'info', "closed connection #{client.id}!"
-    delete @clients[client.id]
+    delete @sessions[client.id]
 
   broadcast: (channel, message) ->
-    for id, client of @clients
-      @send client, channel, message
-
-  send: (client, channel, message) ->
-    payload = {}
-    payload[channel] = message
-    json = JSON.stringify(payload)
-    client.write json
+    for id, session of @sessions
+      session.send channel, message
 
 module.exports = Broadcaster
