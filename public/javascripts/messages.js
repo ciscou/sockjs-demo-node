@@ -6,7 +6,7 @@ $(function() {
     $container.append($li);
     $("html, body").stop().animate({
       scrollTop: $(document).height() - $(window).height()
-    }, 500, 'swing');
+    }, 300, 'swing');
   };
 
   var wait = 1;
