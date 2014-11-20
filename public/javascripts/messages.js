@@ -41,8 +41,9 @@ $(function() {
   var $form = $("form#new-message");
   $form.on("submit", function(e) {
     e.preventDefault();
-    sock.send($("input#message-body").val());
+    var $input = $("input#message-body");
+    sock.send($input.val());
     e.currentTarget.reset();
-    e.currentTarget.focus();
+    $input.focus();
   });
 });
