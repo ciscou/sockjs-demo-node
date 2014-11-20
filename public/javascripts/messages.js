@@ -43,5 +43,6 @@ $(function() {
     e.preventDefault();
     sock.send($("input#message-body").val());
     e.currentTarget.reset();
+    e.currentTarget.focus();
   });
 });
