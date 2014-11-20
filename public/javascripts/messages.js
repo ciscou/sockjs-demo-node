@@ -4,8 +4,8 @@ $(function() {
   var append = function(text) {
     var $li = $("<li />").addClass('list-group-item').text(text);
     $container.append($li);
-    $("html, body").animate({
-      scrollTop: $(document).height()
+    $("html, body").stop().animate({
+      scrollTop: $(document).height() - $(window).height()
     }, 500, 'swing');
   };
 
