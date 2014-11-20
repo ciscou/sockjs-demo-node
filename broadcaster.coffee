@@ -30,8 +30,8 @@ class Broadcaster
     session
 
   removeClient: (client) ->
-    @broadcast 'info', "closed connection #{client.id}!"
     delete @sessions[client.id]
+    @broadcast 'info', "closed connection #{client.id}!"
 
   broadcast: (channel, message) ->
     for id, session of @sessions
