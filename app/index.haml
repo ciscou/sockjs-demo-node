@@ -1,0 +1,31 @@
+!!!
+%html
+  %head
+    %meta{charset: "utf-8"}
+    %meta{name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}
+    %title SockJS Demo
+    %link{media: "all", rel: "stylesheet", href: "stylesheets/bootstrap.min.css"}
+    %link{media: "all", rel: "stylesheet", href: "stylesheets/messages.css"}
+
+  %body
+    .container
+      %h1 Messages
+
+      %ul#messages.list-group
+
+    #new-message-container
+      .container
+        %form#new-message
+          .input-group
+            %input#message-body.form-control.input-lg{type: "text"}
+            %span.input-group-btn
+              %input.btn.btn-lg.btn-block.btn-success{type: "submit", value: "Send"}"
+
+    %script{type: "text/javascript", src: "/javascripts/jquery-2.1.1.min.js"}
+    %script{type: "text/javascript", src: "/javascripts/bootstrap.min.js"}
+    %script{type: "text/javascript", src: "/javascripts/sockjs-0.3.4.min.js"}
+    %script{type: "text/javascript", src: "/javascripts/underscore-min.js"}
+    %script{type: "text/javascript", src: "/javascripts/backbone-min.js"}
+    %script{type: "text/javascript", src: "/javascripts/handlebars.runtime-v2.0.0.js"}
+    %script{type: "text/javascript", src: "/templates/message.js"}
+    %script{type: "text/javascript", src: "/javascripts/messages.js"}

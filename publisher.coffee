@@ -11,6 +11,11 @@ class Publisher
       console.log "got #{messages.length} latest messages"
       callback(messages)
 
+  sendLatestMessagesTo: (session) ->
+    @getLatestMessages (messages) ->
+      for message in messages.reverse()
+        session.send 'latest', message
+
   publish: (message) ->
     @redis.lpush 'messages', message, (err, l) =>
       if err?

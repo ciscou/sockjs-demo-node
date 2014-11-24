@@ -18,9 +18,7 @@ publisher = new Publisher(connectToRedis())
 Broadcaster = require('./broadcaster')
 broadcaster = new Broadcaster
 broadcaster.onNewSession = (session) ->
-  publisher.getLatestMessages (messages) ->
-    for message in messages.reverse()
-      session.send 'latest', message
+  publisher.sendLatestMessagesTo(session)
   session.onMessage = (message) ->
     publisher.publish message
 broadcaster.connect(server)
